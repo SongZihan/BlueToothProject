@@ -25,15 +25,14 @@
 			}
 		},
 		mounted() {
-			helper.openBluetoothAdapter().then((e)=>{
-				helper.startDicoverDevices().then(e=>{
-					helper.foundNewDevice()
+			helper.openBluetoothAdapter(this).then((e)=>{
+				helper.startDicoverDevices(this).then(e=>{
+					helper.foundNewDevice(this)
 					})
 				})
 			// getBluetoothState()
-			console.log("successfully init")
 			// 连接设备
-			helper.connectDevice(this.DeviceId).then(()=>{helper.notifyBLECharacteristicValueChange(this.DeviceId,this.serviceId,this.characteristicId)})
+			helper.connectDevice(this,this.DeviceId).then(()=>{helper.notifyBLECharacteristicValueChange(this,this.DeviceId,this.serviceId,this.characteristicId)})
 		},
 		methods:{
 			get_device(){

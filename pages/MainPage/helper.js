@@ -13,25 +13,32 @@ export function getBluetoothState(){
 }
 
 // 打开蓝牙模块
-export function openBluetoothAdapter(){
-	return new Promise(function(resolve,reject){
+export function openBluetoothAdapter(self){
+	return new Promise((resolve,reject)=>{
 		plus.bluetooth.openBluetoothAdapter({
-			success:(e) => {resolve(e)},
-			fail:(e) => {reject(e)}
+			success:(e) => {
+				log_this(self,"success",'open Bluetooth success: '+JSON.stringify(e))
+				resolve(e)
+				},
+			fail:(e) => {
+				log_this(self,"error",'open Bluetooth error: '+JSON.stringify(e))
+				reject(e)
+				}
 			})
 	})
-	
 }
 
 // 开始搜索蓝牙
-export function startDicoverDevices(){
+export function startDicoverDevices(self){
 	return new Promise((resolve,reject)=>{
 		plus.bluetooth.startBluetoothDevicesDiscovery({
 				success:(e)=>{
+					log_this(self,"success",'start discovery success: '+JSON.stringify(e))
 					console.log('start discovery success: '+JSON.stringify(e))
 					resolve(e)
 				},
 				fail:(e)=>{
+					log_this(self,"error",'start discovery failed: '+JSON.stringify(e))
 					console.log('start discovery failed: '+JSON.stringify(e))
 					reject(e)
 				},
@@ -40,13 +47,15 @@ export function startDicoverDevices(){
 	})
 }
 // 若已经找到需要的蓝牙设备并不需要继续搜索时，应该调用该接口停止蓝牙搜索
-export function stopBluetoothDiscovery(){
+export function stopBluetoothDiscovery(self){
 	return new Promise((resolve,reject)=>{
 		plus.bluetooth.stopBluetoothDevicesDiscovery({
-				success:function(e){
+				success:(e)=>{
+					log_this(self,"success",'stop discovery success: '+JSON.stringify(e))
 					console.log('stop discovery success: '+JSON.stringify(e))
 				},
-				fail:function(e){
+				fail:(e)=>{
+					log_this(self,"error",'stop discovery failed: '+JSON.stringify(e))
 					console.log('stop discovery failed: '+JSON.stringify(e));
 				}
 			})
@@ -60,12 +69,13 @@ export function stopBluetoothDiscovery(){
 
 
 // 获取到新设备
-export function foundNewDevice(){
+export function foundNewDevice(self){
 	return new Promise((resolve,reject)=>{
 		plus.bluetooth.onBluetoothDeviceFound((e)=>{
 				var devices = e.devices;
 				console.log('device found: '+e.length);
 				for(var i in devices){
+					log_this(self,"success",'device found: '+JSON.stringify(devices[i]))
 					console.log(i+': '+JSON.stringify(devices[i]));
 				}
 			})
@@ -93,15 +103,17 @@ export function getBlueToothDeviceList(){
 }
 
 // 连接蓝牙设备
-export function connectDevice(deviceId){
+export function connectDevice(self,deviceId){
 	return new Promise((resolve,reject)=>{
 		plus.bluetooth.createBLEConnection({
 				deviceId:deviceId,
 				success:(e)=>{
+					log_this(self,"success",'create connection success:'+JSON.stringify(e))
 					console.log('create connection success: '+JSON.stringify(e))
 					resolve(e)
 				},
 				fail:(e)=>{
+					log_this(self,"error",'create connection failed: '+JSON.stringify(e))
 					console.log('create connection failed: '+JSON.stringify(e))
 					reject(e)
 				}
@@ -109,7 +121,7 @@ export function connectDevice(deviceId){
 	})
 }
 // 获取蓝牙设备的服务
-export function getDeviceService(deviceId){
+export function getDeviceService(self,deviceId){
 	return new Promise((resolve,reject)=>{
 		// 设置一秒延时
 		setTimeout(()=>{
@@ -117,14 +129,15 @@ export function getDeviceService(deviceId){
 					deviceId:deviceId,
 					success:(e)=>{
 						var services = e.services;
+						log_this(self,"success",'get services success:'+JSON.stringify(e))
 						console.log('get services success: '+services.length);
 						for(var i in services){
 							console.log(i+': '+JSON.stringify(services[i]));
 						}
-						console.log(e)
 						resolve(e)
 					},
 					fail:(e)=>{
+						log_this(self,"error",'get services failed: '+JSON.stringify(e))
 						console.log('get services failed: '+JSON.stringify(e))
 						reject(e)
 					}
@@ -134,22 +147,23 @@ export function getDeviceService(deviceId){
 	})
 }
 // 获取设备特征值
-export function getCharacteristicId(deviceId,serviceId){
+export function getCharacteristicId(self,deviceId,serviceId){
 	return new Promise((resolve,reject)=>{
 		setTimeout(()=>{
 			plus.bluetooth.getBLEDeviceCharacteristics({
 					deviceId:deviceId,
 					serviceId:serviceId,
-					success:function(e){
+					success:(e)=>{
 						var characteristics = e.characteristics;
 						console.log('get characteristics success: '+characteristics.length);
 						for(var i in characteristics){
+							log_this(self,"success",'get characteristics success:'+JSON.stringify(characteristics[i]))
 							console.log(i+': '+JSON.stringify(characteristics[i]));
 						}
-						console.log(e)
 						resolve(e)
 					},
-					fail:function(e){
+					fail:(e)=>{
+						log_this(self,"error",'get characteristics failed: '+JSON.stringify(e))
 						console.log('get characteristics failed: '+JSON.stringify(e))
 						reject(e)
 					}
@@ -172,7 +186,7 @@ function ab2str(arraybuffer) {
       }
 
 // 开启特征值监听
-export function notifyBLECharacteristicValueChange(deviceId,serviceId,characteristicId){
+export function notifyBLECharacteristicValueChange(self,deviceId,serviceId,characteristicId){
 	return new Promise((resolve,reject)=>{
 		setTimeout(()=>{
 			// 监听低功耗蓝牙设备的特征值变化 
@@ -180,11 +194,12 @@ export function notifyBLECharacteristicValueChange(deviceId,serviceId,characteri
 					console.log('onBLECharacteristicValueChange: '+JSON.stringify(e));
 					var value = ab2str(e.value);
 					// var value = new Uint8Array(e.value)
+					log_this(self,"success",'get value : '+JSON.stringify(value))
 					console.log('value(hex) = '+value);
-					if(characteristicId == e.characteristicId){
-						// 更新到页面显示
-						alert('特征值变化: '+value);
-					}
+					// if(characteristicId == e.characteristicId){
+					// 	// 更新到页面显示
+					// 	alert('特征值变化: '+value);
+					// }
 				})
 				
 			plus.bluetooth.notifyBLECharacteristicValueChange({
@@ -195,12 +210,14 @@ export function notifyBLECharacteristicValueChange(deviceId,serviceId,characteri
 						var characteristics = e.characteristics;
 						console.log('get characteristics success: '+characteristics.length);
 						for(var i in characteristics){
+							log_this(self,"success",'notify ValueChange success:'+JSON.stringify(characteristics[i]))
 							console.log(i+': '+JSON.stringify(characteristics[i]));
 						}
 						resolve(e)
 					},
 					fail:(e)=>{
-						console.log('get characteristics failed: '+JSON.stringify(e))
+						log_this(self,"error",'notify ValueChange failed: '+JSON.stringify(e))
+						console.log('notify ValueChange failed: '+JSON.stringify(e))
 						reject(e)
 					}
 				})
@@ -219,13 +236,14 @@ export function startCharacteristicsNotify(deviceId,serviceId,characteristicId){
 				serviceId:serviceId,
 				characteristicId:characteristicId,
 				success:(e)=>{
+					log_this(self,"success",'start Characteristics Notify success: '+JSON.stringify(e))
 					console.log('read characteristics success: '+JSON.stringify(e))
 					resolve(e)
 				},
 				fail:(e)=>{
+					log_this(self,"error",'start Characteristics Notify failed: '+JSON.stringify(e))
 					console.log('read characteristics failed: '+JSON.stringify(e))
-					console.log(e.errMsg)
-					reject()
+					reject(e)
 				}
 			})
 	})
