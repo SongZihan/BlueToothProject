@@ -1,3 +1,5 @@
+import {getCurrentTime} from './time_helper.js'
+
 // 获取蓝牙状态
 export function getBluetoothState(){
 	plus.bluetooth.getBluetoothAdapterState({
@@ -37,6 +39,26 @@ export function startDicoverDevices(){
 			})
 	})
 }
+// 若已经找到需要的蓝牙设备并不需要继续搜索时，应该调用该接口停止蓝牙搜索
+export function stopBluetoothDiscovery(){
+	return new Promise((resolve,reject)=>{
+		plus.bluetooth.stopBluetoothDevicesDiscovery({
+				success:function(e){
+					console.log('stop discovery success: '+JSON.stringify(e))
+				},
+				fail:function(e){
+					console.log('stop discovery failed: '+JSON.stringify(e));
+				}
+			})
+	})
+}
+
+
+
+
+
+
+
 // 获取到新设备
 export function foundNewDevice(){
 	return new Promise((resolve,reject)=>{
@@ -238,3 +260,23 @@ export function writeDeviceData(deviceId,serviceId,characteristicId){
 
 	})
 }
+
+// 将log信息写入显示元素中以在手机屏幕上打印log
+export function log_this(self,type,str){
+	var time = getCurrentTime()
+	switch(type){
+		case "error":
+		self.logPlace += time + ": " + "error " + str + '\r\n'
+			break
+		case "warn":
+			self.logPlace += time + ": " + "warn " + str + '\r\n'
+			break
+		case "info":
+		self.logPlace += time + ": " + "info " + str + '\r\n'
+			break
+		case "success":
+		self.logPlace += time + ": " + "success " + str + '\r\n'
+			break
+	}
+}
+
